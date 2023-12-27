@@ -1,0 +1,31 @@
+version: "3"
+
+services:
+  vllm:
+    runtime: nvidia
+    build:
+      context : ..
+      dockerfile: Dockerfile.vllm
+    environment:
+      - MODEL=TheBloke/Vigostral-7B-Chat-AWQ
+      - QUANTIZATION=awq
+      - MAX_MODEL_LEN=1024
+      - GPU_MEMORY_UTILIZATION=0.4
+
+  tts:
+    runtime: nvidia
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile.tts
+    environment:
+      - MODEL=tts_models/fr/mai/tacotron2-DDC
+      - DEVICE=cpu
+
+  asr:
+    runtime: nvidia
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile.asr
+    environment:
+      - MODEL=base
+      - LANGUAGE=fr
