@@ -29,6 +29,7 @@ services:
     environment:
       - MODEL=base
       - LANGUAGE=fr
+      - DEVICE=cuda
 
   chatbot:
     build:
@@ -36,4 +37,8 @@ services:
       dockerfile: docker/Dockerfile.chatbot
     environment:
       - ASR_API_HOST=asr
-      - ASR_API_PORT=8000
+      - ASR_API_PORT=5000
+      - TTS_API_HOST=tts
+      - TTS_API_PORT=5000
+      - LLM_API_HOST=vllm
+      - LLM_API_PORT=8000
