@@ -1,9 +1,12 @@
+import json
 import queue
 import numpy as np
 import speech_recognition as sr
 import time
 import threading
 import torch
+import requests
+import os
 
 import logging
 from typing_extensions import Literal
@@ -37,6 +40,8 @@ class MicHandler:
         self.dynamic_energy = dynamic_energy
 
         self.audio_queue = queue.Queue()
+        self.result_queue = queue.Queue()
+
         self.__setup_mic(mic_index)
 
 
@@ -59,10 +64,13 @@ class MicHandler:
         audio = bytes()
         got_audio = False
         time_start = time.time()
-        while not got_audio or time.time() - time_start < min_time:
-            while not self.audio_queue.empty():
-                audio += self.audio_queue.get()
-                got_audio = True
+        try:
+            while not got_audio or time.time() - time_start < min_time:
+                while not self.audio_queue.empty():
+                    audio += self.audio_queue.get()
+                    got_audio = True
+        except KeyboardInterrupt:
+            exit(1)
 
         data = sr.AudioData(audio,16000,2)
         data = data.get_raw_data()
@@ -83,20 +91,79 @@ class MicHandler:
             audio_data = data
         audio_data = self.__preprocess(audio_data)
 
-        # DEV 
-        print(audio_data)
+        self.result_queue.put_nowait(audio_data)
 
-    def listen_loop(self, dictate: bool = False, phrase_time_limit=None) -> None:
+    def __listen_forever(self) -> None:
 
-        self.recorder.listen_in_background(
-            self.source, 
-            self.__record_load, 
-            phrase_time_limit=phrase_time_limit
+        try:
+            while True:
+                self.__listen()
+        except KeyboardInterrupt:
+            exit(1)
+
+    def __postprocess(self, audio_data):
+        print("Received :", audio_data)
+
+    def listen_loop(self, phrase_time_limit=None) -> None:
+
+        try:
+            self.recorder.listen_in_background(
+                self.source, 
+                self.__record_load, 
+                phrase_time_limit=phrase_time_limit
+            )
+            self.logger.info("Listening...")
+            threading.Thread(
+                target=self.__listen_forever, daemon=True
+            ).start()
+
+            while True:
+                result = self.result_queue.get()
+                self.__postprocess(result)
+        except KeyboardInterrupt:
+            exit(1)
+
+class MicClient(MicHandler):
+
+    """
+    Take input from microphone, convert raw data to torch Tensor (sample rate = 16000) and send tensor to asr endpoint.
+    """
+
+    def __init__(
+            self,
+            asr_api_host=None,
+            asr_api_port=None
+        ):
+        
+        super().__init__()
+
+        if asr_api_host:
+            self.asr_api_host = asr_api_host
+        else:
+            self.asr_api_host = os.environ.get("ASR_API_HOST", "localhost")
+        if asr_api_port:
+            self.asr_api_port = asr_api_port
+        else:
+            self.asr_api_port = os.environ.get("ASR_API_PORT", "8000")
+
+        self.asr_endpoint = f"http://{self.asr_api_host}:{self.asr_api_port}/transcribe"
+
+    def __postprocess(self, audio_data):
+        self.make_request(audio_data)
+
+    def make_request(self, audio_data:torch.Tensor):
+
+        data = audio_data.cpu().numpy().tolist()
+        payload = {
+            "audio_data" : data
+        }
+        
+        response = requests.post(
+            self.asr_endpoint,
+            data=json.dumps(payload)
         )
-        self.logger.info("Listening...")
-        threading.Thread(
-            target=self.__listen, daemon=True
-        ).start()
+        return response
+
 
 if __name__ == "__main__":
 
@@ -105,4 +172,3 @@ if __name__ == "__main__":
         mic_handler.listen_loop()
     except KeyboardInterrupt:
         print("Stopping...")
-        exit(1)

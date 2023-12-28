@@ -29,3 +29,11 @@ services:
     environment:
       - MODEL=base
       - LANGUAGE=fr
+
+  chatbot:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile.chatbot
+    environment:
+      - ASR_API_HOST=asr
+      - ASR_API_PORT=8000

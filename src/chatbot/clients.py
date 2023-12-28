@@ -2,7 +2,7 @@ import requests
 import json
 import os
 
-from .WhisperMic import WhisperMic
+from .clients import MicClient
 
 class LLMClient:
 
@@ -100,34 +100,13 @@ class TTSClient:
         audio_bytes = self.parse_response(response)
         return audio_bytes
 
-class ASRClient:
-
-    def __init__(
-        self,
-        model=None
-    ):
-        
-        if not model:
-            self.model = os.environ.get("MODEL", "base")
-        else:
-            self.model = model
-
-        self.phrase_time_limit = 10
-
-        self.mic = WhisperMic(
-            model=model
-        )
-
-    def run(self):
-        self.mic.listen_loop(phrase_time_limit=self.phrase_time_limit)
-
 class ChatbotClient:
 
     def __init__(self):
 
         self.llm_client = LLMClient()
         self.tts_client = TTSClient()
-        self.asr_client = ASRClient()
+        self.asr_client = MicClient()
 
         self.wake_up_word = "Alfred"
 

@@ -1,0 +1,9 @@
+FROM ubuntu:20.04
+
+COPY src/chatbot /chatbot
+COPY docker/requirements-chatbot.txt /requirements-chatbot.txt
+
+RUN pip install /requirements-chatbot.txt
+
+COPY docker/chatbot_entrypoint.sh /chatbot_entrypoint.sh
+ENTRYPOINT [ "bash", "/chatbot_entrypoint.sh" ]
