@@ -11,6 +11,9 @@ services:
       - QUANTIZATION=awq
       - MAX_MODEL_LEN=1024
       - GPU_MEMORY_UTILIZATION=0.4
+    networks:
+      network:
+        ipv4_address: 10.5.0.2
 
   tts:
     runtime: nvidia
@@ -20,6 +23,9 @@ services:
     environment:
       - MODEL=tts_models/fr/mai/tacotron2-DDC
       - DEVICE=cpu
+    networks:
+      network:
+        ipv4_address: 10.5.0.3
 
   asr:
     runtime: nvidia
@@ -27,10 +33,11 @@ services:
       context: ..
       dockerfile: docker/Dockerfile.asr
     environment:
-      - MODEL=bofenghuang/whisper-medium-french
+      - MODEL=bofenghuang/whisper-small-cv11-french
       - DEVICE=cuda
-    volumes:
-      - ./model/asr:/model
+    networks:
+      network:
+        ipv4_address: 10.5.0.4
 
   chatbot:
     build:
@@ -43,3 +50,14 @@ services:
       - TTS_API_PORT=5000
       - LLM_API_HOST=vllm
       - LLM_API_PORT=8000
+    networks:
+      network:
+        ipv4_address: 10.5.0.5
+
+networks:
+  network:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 10.5.0.0/16
+          gateway: 10.5.0.1

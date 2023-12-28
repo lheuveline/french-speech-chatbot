@@ -1,8 +1,12 @@
 import requests
 import json
 import os
+import subprocess
 
-from .clients import MicClient
+import numpy as np
+from scipy.io.wavfile import write
+
+from .mic_handler import MicClient
 
 class LLMClient:
 
@@ -95,8 +99,13 @@ class TTSClient:
 
     def make_request(self, text):
 
-        data = {"text", text}
-        response = requests.post(self.tts_endpoint, data=json.dumps(data))
+        data = {"text" : text}
+        headers = {"Content-Type" : "application/json"}
+        response = requests.post(
+            self.tts_endpoint, 
+            data=json.dumps(data), 
+            headers=headers
+        )
         audio_bytes = self.parse_response(response)
         return audio_bytes
 
@@ -110,9 +119,11 @@ class ChatbotClient:
 
         self.wake_up_word = "Alfred"
 
-    def process_asr_result(self, result):
+    def process_mic_input(self, result):
         
         """Trigger requests if self.wake_up_word is in asr result"""
+
+        asr_output = self.asr_client.make_request(result["audio_data"])
         
         if self.wake_up_word in result:
             clean_result = result.replace(self.wake_up_word, "", 1)
@@ -121,11 +132,20 @@ class ChatbotClient:
             llm_response = self.llm_client.make_request(clean_result)
             print("Getting TTS response...")
             tts_response = self.tts_client.make_request(llm_response)
-            return tts_response
+            self.play_tts_response(asr_output)
         
     def play_tts_response(self, response):
+        
+        temp_filename = "tmp.wav"
 
-        wav_bytes = response.content
+        wav_data = response.json()["audio"]
+        wav_data = np.asarray(wav_data)
+        write(temp_filename, 22050, wav_data)
+
+        cmd = ["play", temp_filename]
+        subprocess.Popen(cmd)
+        os.remove(temp_filename)
+
 
     def run(self):
 
@@ -141,9 +161,7 @@ class ChatbotClient:
             self.asr_client.run()
             while True:
                 result = self.mic.result_queue.get()
-                print(result)
-                audio_output = self.process_asr_result(result)
-                self.play_tts_response(audio_output)
+                self.process_mic_input(result)
         except KeyboardInterrupt:
             print("Operation interrupted successfully")
 

@@ -154,16 +154,19 @@ class MicClient(MicHandler):
     def make_request(self, audio_data:torch.Tensor):
 
         data = audio_data.cpu().numpy().tolist()
+        headers = {
+            "Content-Type": "application/json"
+        }
         payload = {
             "audio_data" : data
         }
         
         response = requests.post(
             self.asr_endpoint,
-            data=json.dumps(payload)
+            data=json.dumps(payload),
+            headers=headers
         )
         return response
-
 
 if __name__ == "__main__":
 

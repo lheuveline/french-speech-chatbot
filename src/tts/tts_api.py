@@ -4,6 +4,7 @@ import os
 from flask import Flask, request, send_file
 from scipy.io.wavfile import write
 
+import numpy as np
 import torch
 from TTS.api import TTS
 
@@ -25,18 +26,19 @@ class TTSClient:
         device = os.environ.get("DEVICE", "cpu")
         # Init TTS
         self.tts = TTS(self.model).to(device)
+        self.tts_sample_rate = 22050
 
     def write_bytes(self, wav):
 
         file_obj = io.BytesIO()
-        write(file_obj, self.tts.sample_rate, wav)
+        write(file_obj, self.tts_sample_rate, wav)
         file_obj.seek(0)
         return file_obj
 
     def inference(self, text):
 
         # Run TTS
-        wav = self.tts.tts(text=text)
+        wav = np.asarray(self.tts.tts(text=text))
         wav_bytes = self.write_bytes(wav)
         return wav_bytes
 
