@@ -27,9 +27,10 @@ services:
       context: ..
       dockerfile: docker/Dockerfile.asr
     environment:
-      - MODEL=base
-      - LANGUAGE=fr
+      - MODEL=bofenghuang/whisper-medium-french
       - DEVICE=cuda
+    volumes:
+      - ./model/asr:/model
 
   chatbot:
     build:
