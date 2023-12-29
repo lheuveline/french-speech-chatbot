@@ -27,8 +27,6 @@ Start talking using `Alfred` wake up word and wait for a response.
 
 * Environment variables :
 
-```
-
 vLLM:
 ```
 MODEL
