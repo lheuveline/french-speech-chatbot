@@ -1,6 +1,6 @@
-#### French Speech Chatbot
+# French Speech Chatbot
 
-# Presentation
+## Presentation
 
 This project is a deployment stack for a full speech capable chatbot in french language.
 It uses Docker-Compose to run separate API's for each task: ASR, Language generation, TTS.
@@ -14,11 +14,11 @@ When the Chatbot detect a request, it will send request to the LLM to get an ans
   * Reduce ASR model GPU usage
   * Get or train a better French TTS model
 
-# Requirements
+## Requirements
 
 Running the project requires at least 14GB of VRAM.
 
-# Usage
+## Usage
 
 * Start the Chatbot in the background :
 ``` docker compose -f docker/docker-compose.yaml up -d ```
@@ -53,7 +53,7 @@ NAME
 AUTONOMOUS_MODE
 ```
 
-# Aknowledgements
+## Aknowledgements
 
 * vLLM
 * CoquiTTS
