@@ -8,7 +8,7 @@ from scipy.io.wavfile import read
 
 ASR_ENDPOINT="http://10.5.0.4:5000/transcribe"
 
-wav_filename = "tests/asr_test_wav.wav"
+wav_filename = "tests/asr_test_input.wav"
 sr, audio_data = read(wav_filename)
 audio_data = audio_data.astype(np.float32) / 32768.0
 audio_data = audio_data.tolist()

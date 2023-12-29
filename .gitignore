@@ -1,3 +1,5 @@
 .ipynb_checkpoints/
 tts_test_output.wav
+asr_test_input.wav
+tmp.wav
 __pycache__/

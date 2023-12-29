@@ -14,7 +14,9 @@ class LLMClient:
         self,
         llm_api_host=None,
         llm_api_port=None,
-        system_message=None
+        system_message=None,
+        remove_punctuation=False,
+        debug=False
     ):
         
         if not llm_api_host:
@@ -25,6 +27,12 @@ class LLMClient:
             self.llm_api_port = os.environ.get("LLM_API_PORT", "8000")
         else:
             self.llm_api_port = llm_api_port
+
+        self.remove_punctuation = os.environ.get(
+            "REMOVE_PUNCTUATION", 
+            remove_punctuation
+        )
+        self.debug = os.environ.get("DEBUG", False)
 
         self.llm_endpoint = f"http://{self.llm_api_host}:{self.llm_api_port}/generate"
 
@@ -57,6 +65,12 @@ class LLMClient:
             .split('[/INST]')[-1] \
             .replace("\n", "") \
             .strip()
+        
+        if self.remove_punctuation:
+            for punct in [",.!?"]:
+                parsed_response = parsed_response \
+                    .replace(punct, "")
+
         return parsed_response
 
     def make_request(self, text:str, params:dict = None):
@@ -111,40 +125,47 @@ class TTSClient:
 
 class ChatbotClient:
 
-    def __init__(self):
+    def __init__(
+            self,
+            debug=False
+        ):
 
         self.llm_client = LLMClient()
         self.tts_client = TTSClient()
         self.asr_client = MicClient()
 
         self.wake_up_word = "Alfred"
+        self.wake_up_word = self.wake_up_word.lower()
+
+        self.debug = os.environ.get("DEBUG", False)
 
     def process_mic_input(self, result):
         
         """Trigger requests if self.wake_up_word is in asr result"""
 
-        asr_output = self.asr_client.make_request(result["audio_data"])
+        asr_output = self.asr_client.make_request(result["audio_data"]).json()
+        print("Listened :", asr_output)
         
-        if self.wake_up_word in result:
-            clean_result = result.replace(self.wake_up_word, "", 1)
+        if self.wake_up_word in asr_output:
+            # Need to cut sentence and keep chars only after self.wake_up_word
+            clean_result = asr_output.replace(self.wake_up_word, "", 1)
 
             print("Getting LLM response...")
             llm_response = self.llm_client.make_request(clean_result)
+            print("LLM response:", llm_response)
             print("Getting TTS response...")
             tts_response = self.tts_client.make_request(llm_response)
-            self.play_tts_response(asr_output)
+            self.play_tts_response(tts_response)
         
     def play_tts_response(self, response):
         
         temp_filename = "tmp.wav"
-
-        wav_data = response.json()["audio"]
-        wav_data = np.asarray(wav_data)
-        write(temp_filename, 22050, wav_data)
+        with open(temp_filename, "wb") as f:
+            f.write(response)
 
         cmd = ["play", temp_filename]
-        subprocess.Popen(cmd)
-        os.remove(temp_filename)
+        subprocess.check_output(cmd)
+        #os.remove(temp_filename)
 
 
     def run(self):
