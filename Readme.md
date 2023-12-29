@@ -9,7 +9,7 @@ The Chatbot uses microphone input to detect speech. If its wake_up word ("Alfred
 When the Chatbot detect a request, it will send request to the LLM to get an answer and then use TTS to synthesize response and play the output through speakers.
 
 - TO-DO :
-  * Add a way to use local models for LLM server
+  * Add a way to use local models each service
   * Add service to enable LLM model finetuning
   * Reduce ASR model GPU usage
   * Get or train a better French TTS model
@@ -24,6 +24,36 @@ Running the project requires at least 14GB of VRAM.
 ``` docker compose -f docker/docker-compose.yaml up -d ```
 
 Start talking using `Alfred` wake up word and wait for a response.
+
+* Environment variables :
+
+```
+
+vLLM:
+```
+MODEL
+QUANTIZATION
+MAX_MODEL_LEN
+GPU_MEMORY_UTILIZATION
+```
+
+TTS:
+```
+MODEL
+DEVICE
+```
+
+ASR:
+```
+MODEL
+DEVICE
+```
+
+Chatbot:
+```
+NAME
+AUTONOMOUS_MODE
+```
 
 # Aknowledgements
 

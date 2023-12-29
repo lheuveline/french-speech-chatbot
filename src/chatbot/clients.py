@@ -136,7 +136,7 @@ class ChatbotClient:
         debug = os.environ.get("DEBUG", "False")
         self.debug = True if debug.lower() in ["true", "1"] else False
 
-        autonomous_mode = os.environ.get("autonomous_mode", "False")
+        autonomous_mode = os.environ.get("AUTONOMOUS_MODE", "False")
         self.autonomous_mode = True if autonomous_mode.lower() in ["true", "1"] else False
 
     def process_mic_input(self, result):
