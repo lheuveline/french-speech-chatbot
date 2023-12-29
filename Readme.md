@@ -30,28 +30,28 @@ Start talking using `Alfred` wake up word and wait for a response.
 
 vLLM:
 ```
-MODEL
-QUANTIZATION
-MAX_MODEL_LEN
-GPU_MEMORY_UTILIZATION
+MODEL : Model to load for vLLM server
+QUANTIZATION : Quantization mode
+MAX_MODEL_LEN : maximum model length
+GPU_MEMORY_UTILIZATION : GPU utilization ratio
 ```
 
 TTS:
 ```
-MODEL
-DEVICE
+MODEL : TTS model to load with CoquiTTS
+DEVICE : Device to use for TTS model : "cpu" or "cuda"
 ```
 
 ASR:
 ```
-MODEL
-DEVICE
+MODEL : Transformers ASR model to use
+DEVICE : Device to use for ASR model : "cpu" or "cuda"
 ```
 
 Chatbot:
 ```
-NAME
-AUTONOMOUS_MODE
+NAME : Chatbot's name, used as wake up word.
+AUTONOMOUS_MODE : If set to `true`, the chatbot will talk to himself. No ASR.
 ```
 
 ## Aknowledgements
