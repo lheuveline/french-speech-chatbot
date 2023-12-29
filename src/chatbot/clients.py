@@ -3,6 +3,7 @@ import json
 import os
 import subprocess
 import re
+import time
 
 from .mic_handler import MicClient
 
@@ -135,8 +136,8 @@ class ChatbotClient:
         debug = os.environ.get("DEBUG", "False")
         self.debug = True if debug.lower() in ["true", "1"] else False
 
-        psychotic_mode = os.environ.get("PSYCHOTIC_MODE", "False")
-        self.psychotic_mode = True if psychotic_mode.lower() in ["true", "1"] else False
+        autonomous_mode = os.environ.get("autonomous_mode", "False")
+        self.autonomous_mode = True if autonomous_mode.lower() in ["true", "1"] else False
 
     def process_mic_input(self, result):
         
@@ -167,7 +168,7 @@ class ChatbotClient:
         if not self.debug:
             os.remove(temp_filename)
 
-    def run_psychotic_mode(self):
+    def run_autonomous_mode(self):
 
         """
         Enable psychotic mode.
@@ -201,13 +202,15 @@ class ChatbotClient:
                 llm_response = llm_response + ". Pose une question."
                 current_text = llm_response
 
+                time.sleep(2)
+
         except KeyboardInterrupt:
             print("Quitting...")
 
     def run(self):
 
-        if self.psychotic_mode:
-            self.run_psychotic_mode()
+        if self.autonomous_mode:
+            self.run_autonomous_mode()
         else:
             try:
                 self.asr_client.run()
