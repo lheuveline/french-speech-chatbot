@@ -11,6 +11,8 @@ When the Chatbot detect a request, it will send request to the LLM to get an ans
 - TO-DO :
   * Add a way to use local models for LLM server
   * Add service to enable LLM model finetuning
+  * Reduce ASR model GPU usage
+  * Get or train a better French TTS model
 
 # Requirements
 
