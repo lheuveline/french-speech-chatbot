@@ -4,9 +4,6 @@ import os
 import subprocess
 import re
 
-import numpy as np
-from scipy.io.wavfile import write
-
 from .mic_handler import MicClient
 
 class LLMClient:
