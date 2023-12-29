@@ -130,7 +130,7 @@ class ChatbotClient:
         self.tts_client = TTSClient()
         self.asr_client = MicClient()
 
-        self.wake_up_word = "Alfred"
+        self.wake_up_word = os.environ.get("NAME", "Alfred")
         self.wake_up_word = self.wake_up_word.lower()
 
         debug = os.environ.get("DEBUG", "False")

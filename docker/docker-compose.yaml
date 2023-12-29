@@ -44,6 +44,7 @@ services:
       context: ..
       dockerfile: docker/Dockerfile.chatbot
     environment:
+      - NAME=Alfred
       - ASR_API_HOST=asr
       - ASR_API_PORT=5000
       - TTS_API_HOST=tts
