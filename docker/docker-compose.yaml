@@ -21,7 +21,6 @@ services:
       context: ..
       dockerfile: docker/Dockerfile.tts
     environment:
-      # - MODEL=tts_models/fr/mai/tacotron2-DDC
       - MODEL=tts_models/fr/css10/vits
       - DEVICE=cpu
     networks:
