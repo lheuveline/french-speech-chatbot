@@ -14,7 +14,7 @@ class TTSClient:
 
     def __init__(
             self,
-            model="tts_models/fr/mai/tacotron2-DDC"
+            model=None
         ):
         
         if not model:

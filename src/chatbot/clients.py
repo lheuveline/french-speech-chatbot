@@ -2,6 +2,7 @@ import requests
 import json
 import os
 import subprocess
+import re
 
 import numpy as np
 from scipy.io.wavfile import write
@@ -125,10 +126,7 @@ class TTSClient:
 
 class ChatbotClient:
 
-    def __init__(
-            self,
-            debug=False
-        ):
+    def __init__(self):
 
         self.llm_client = LLMClient()
         self.tts_client = TTSClient()
@@ -137,7 +135,11 @@ class ChatbotClient:
         self.wake_up_word = "Alfred"
         self.wake_up_word = self.wake_up_word.lower()
 
-        self.debug = os.environ.get("DEBUG", False)
+        debug = os.environ.get("DEBUG", "False")
+        self.debug = True if debug.lower() in ["true", "1"] else False
+
+        psychotic_mode = os.environ.get("PSYCHOTIC_MODE", "False")
+        self.psychotic_mode = True if psychotic_mode.lower() in ["true", "1"] else False
 
     def process_mic_input(self, result):
         
@@ -165,26 +167,58 @@ class ChatbotClient:
 
         cmd = ["play", temp_filename]
         subprocess.check_output(cmd)
-        #os.remove(temp_filename)
+        if not self.debug:
+            os.remove(temp_filename)
 
+    def run_psychotic_mode(self):
+
+        """
+        Enable psychotic mode.
+        In this mode, the chatbot will talk to himself by getting response to LLM responses and synthesizing them back. asr is not used in this mode.
+        """
+
+        def parse_llm_response(text):
+
+            to_clean = [
+                r"^.*:"
+            ]
+            clean = text
+            for pattern in to_clean:
+                clean = re.sub(pattern, "", clean)
+            clean = clean.strip()
+            return clean
+
+        seed = "Donne moi un exemple de grand évènement historique et pose une question."
+
+        current_text = seed
+        try:
+            while True:
+                # Direct LLM call
+                llm_response = self.llm_client.make_request(current_text)
+                print("LLM response:", llm_response)
+                llm_response = parse_llm_response(llm_response)
+
+                tts_response = self.tts_client.make_request(llm_response)
+                self.play_tts_response(tts_response)
+
+                llm_response = llm_response + ". Pose une question."
+                current_text = llm_response
+
+        except KeyboardInterrupt:
+            print("Quitting...")
 
     def run(self):
 
-        """
-        - Start ASR listen loop
-        - If self.wake_up_word is detected in transcribe:
-          - send detected text after self.wake_up_word to LLM API
-          - send LLM response to TTS API
-          - Play TTS API response (audio_bytes)
-        """
-
-        try:
-            self.asr_client.run()
-            while True:
-                result = self.mic.result_queue.get()
-                self.process_mic_input(result)
-        except KeyboardInterrupt:
-            print("Operation interrupted successfully")
+        if self.psychotic_mode:
+            self.run_psychotic_mode()
+        else:
+            try:
+                self.asr_client.run()
+                while True:
+                    result = self.mic.result_queue.get()
+                    self.process_mic_input(result)
+            except KeyboardInterrupt:
+                print("Operation interrupted successfully")
 
 if __name__ == "__main__":
 
