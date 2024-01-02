@@ -145,6 +145,7 @@ class ChatbotClient:
 
         asr_output = self.asr_client.make_request(result["audio_data"]).json()
         print("Listened :", asr_output)
+        print(self.wake_up_word in asr_output[0])
         
         if self.wake_up_word in asr_output:
             # Need to cut sentence and keep chars only after self.wake_up_word

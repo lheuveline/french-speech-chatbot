@@ -11,8 +11,6 @@ RUN pip install \
 
 COPY src/asr/api.py /api.py
 COPY docker/asr_entrypoint.sh /asr_entrypoint.sh
-RUN mkdir /model
-COPY ./models/wav2vec2-large-xlsr-53-french.quant.onnx /model
 
 ENV PYTHONUNBUFFERED=1
 

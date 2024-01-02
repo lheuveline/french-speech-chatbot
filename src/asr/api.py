@@ -29,6 +29,7 @@ def predict(wav):
 
     predicted_ids = torch.argmax(logits, dim=-1)
     predicted_sentences = processor.batch_decode(predicted_ids)
+    predicted_sentences = " .".join(predicted_sentences)
     return predicted_sentences
 
 @app.route('/transcribe', methods=['POST'])
