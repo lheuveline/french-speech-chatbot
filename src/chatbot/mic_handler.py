@@ -64,13 +64,14 @@ class MicHandler:
         audio = bytes()
         got_audio = False
         time_start = time.time()
-        try:
-            while not got_audio or time.time() - time_start < min_time:
+
+        while not got_audio or time.time() - time_start < min_time:
+            try:
                 while not self.audio_queue.empty():
                     audio += self.audio_queue.get()
                     got_audio = True
-        except KeyboardInterrupt:
-            exit(1)
+            except KeyboardInterrupt:
+                print("Stopping record loop.")
 
         data = sr.AudioData(audio,16000,2)
         data = data.get_raw_data()
@@ -95,33 +96,27 @@ class MicHandler:
 
     def __listen_forever(self) -> None:
 
-        try:
-            while True:
-                self.__listen()
-        except KeyboardInterrupt:
-            exit(1)
+        while True:
+            self.__listen()
 
     def __postprocess(self, audio_data):
         print("Received :", audio_data)
 
     def listen_loop(self, phrase_time_limit=None) -> None:
 
-        try:
-            self.recorder.listen_in_background(
-                self.source, 
-                self.__record_load, 
-                phrase_time_limit=phrase_time_limit
-            )
-            self.logger.info("Listening...")
-            threading.Thread(
-                target=self.__listen_forever, daemon=True
-            ).start()
+        self.recorder.listen_in_background(
+            self.source, 
+            self.__record_load, 
+            phrase_time_limit=phrase_time_limit
+        )
+        self.logger.info("Listening...")
+        threading.Thread(
+            target=self.__listen_forever, daemon=True
+        ).start()
 
-            while True:
-                result = self.result_queue.get()
-                self.__postprocess(result)
-        except KeyboardInterrupt:
-            exit(1)
+        while True:
+            result = self.result_queue.get()
+            self.__postprocess(result)
 
 class MicClient(MicHandler):
 
@@ -149,10 +144,28 @@ class MicClient(MicHandler):
         self.asr_endpoint = f"http://{self.asr_api_host}:{self.asr_api_port}/transcribe"
 
     def __postprocess(self, audio_data):
+        self.logger.info("Received audio data")
         self.make_request(audio_data)
+
+    def listen_loop(self, phrase_time_limit=None) -> None:
+
+        self.recorder.listen_in_background(
+            self.source, 
+            self._MicHandler__record_load, 
+            phrase_time_limit=phrase_time_limit
+        )
+        self.logger.info("Listening...")
+        threading.Thread(
+            target=self._MicHandler__listen_forever, daemon=True
+        ).start()
+
+        while True:
+            result = self.result_queue.get()
+            self.__postprocess(result)
 
     def make_request(self, audio_data:torch.Tensor):
 
+        self.logger.info(f"Making request to : {self.asr_endpoint}")
         data = audio_data.cpu().numpy().tolist()
         headers = {
             "Content-Type": "application/json"
@@ -160,18 +173,18 @@ class MicClient(MicHandler):
         payload = {
             "audio_data" : data
         }
-        
         response = requests.post(
             self.asr_endpoint,
             data=json.dumps(payload),
-            headers=headers
+            headers=headers,
+            timeout=60
         )
         return response
 
 if __name__ == "__main__":
 
-    mic_handler = MicHandler()
+    mic_client = MicClient()
     try:
-        mic_handler.listen_loop()
+        mic_client.listen_loop()
     except KeyboardInterrupt:
         print("Stopping...")

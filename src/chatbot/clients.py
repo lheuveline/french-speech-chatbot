@@ -5,7 +5,7 @@ import subprocess
 import re
 import time
 
-from .mic_handler import MicClient
+from mic_handler import MicClient
 
 class LLMClient:
 
@@ -139,6 +139,9 @@ class ChatbotClient:
         autonomous_mode = os.environ.get("AUTONOMOUS_MODE", "False")
         self.autonomous_mode = True if autonomous_mode.lower() in ["true", "1"] else False
 
+        if not self.autonomous_mode:
+            self.mic_client = MicClient()
+
     def process_mic_input(self, result):
         
         """Trigger requests if self.wake_up_word is in asr result"""
@@ -214,10 +217,7 @@ class ChatbotClient:
             self.run_autonomous_mode()
         else:
             try:
-                self.asr_client.run()
-                while True:
-                    result = self.mic.result_queue.get()
-                    self.process_mic_input(result)
+                self.mic_client.listen_loop()
             except KeyboardInterrupt:
                 print("Operation interrupted successfully")
 

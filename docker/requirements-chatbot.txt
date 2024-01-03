@@ -2,3 +2,4 @@ numpy
 requests==2.31.0
 SpeechRecognition==3.10.1
 torch==2.1.2
+rich==13.7.0
