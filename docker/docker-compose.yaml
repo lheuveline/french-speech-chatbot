@@ -11,6 +11,8 @@ services:
       - QUANTIZATION=awq
       - MAX_MODEL_LEN=1024
       - GPU_MEMORY_UTILIZATION=0.4
+    ports:
+      - 8000:8000
     networks:
       network:
         ipv4_address: 10.5.0.2
@@ -23,6 +25,8 @@ services:
     environment:
       - MODEL=tts_models/fr/css10/vits
       - DEVICE=cpu
+    ports:
+      - 5001:5000
     networks:
       network:
         ipv4_address: 10.5.0.3
@@ -35,6 +39,8 @@ services:
     environment:
       - MODEL=bofenghuang/whisper-small-cv11-french
       - DEVICE=cuda
+    ports:
+      - 5000:5000
     networks:
       network:
         ipv4_address: 10.5.0.4

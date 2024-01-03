@@ -124,11 +124,19 @@ class TTSClient:
 
 class ChatbotClient:
 
-    def __init__(self):
+    def __init__(
+            self,
+            llm_api_host=None,
+            llm_api_port=None,
+            tts_api_host=None,
+            tts_api_port=None,
+            asr_api_host=None,
+            asr_api_port=None
+        ):
 
-        self.llm_client = LLMClient()
-        self.tts_client = TTSClient()
-        self.asr_client = MicClient()
+        self.llm_client = LLMClient(llm_api_host, llm_api_port)
+        self.tts_client = TTSClient(tts_api_host, tts_api_port)
+        self.asr_client = MicClient(asr_api_host, asr_api_port)
 
         self.wake_up_word = os.environ.get("NAME", "Alfred")
         self.wake_up_word = self.wake_up_word.lower()
@@ -175,7 +183,7 @@ class ChatbotClient:
     def run_autonomous_mode(self):
 
         """
-        Enable psychotic mode.
+        Enable autonomous mode.
         In this mode, the chatbot will talk to himself by getting response to LLM responses and synthesizing them back. asr is not used in this mode.
         """
 
@@ -223,5 +231,16 @@ class ChatbotClient:
 
 if __name__ == "__main__":
 
-    chatbot_client = ChatbotClient()
+    import argparse
+
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--llm_api_host", default=None)
+    parser.add_argument("--llm_api_port", default=None)
+    parser.add_argument("--tts_api_host", default=None)
+    parser.add_argument("--tts_api_port", default=None)
+    parser.add_argument("--asr_api_host", default=None)
+    parser.add_argument("--asr_api_port", default=None)
+    args = parser.parse_args()
+
+    chatbot_client = ChatbotClient(**vars(args))
     chatbot_client.run()
