@@ -18,7 +18,7 @@ When the Chatbot detect a request, it will send request to the LLM to get an ans
 
 ## Requirements
 
-Running the project requires at least 14GB of VRAM.
+Running the project requires at least 8GB of VRAM.
 
 ## Usage
 
