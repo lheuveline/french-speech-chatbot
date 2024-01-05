@@ -4,8 +4,10 @@
 
 This project is a deployment stack for a full speech capable chatbot in french language.
 It uses Docker-Compose to run separate API's for each task: ASR, Language generation, TTS.
+Using docker-compose architecture, all models can run on remote host, allowing to run chatbot app on low performance hardware. This way, the compute cost can be cut if running on cloud by starting the stack only when used.
+For windows users, chatbot must be run using `python src/chatbot/clients.py`. Linux users can use docker if ensuring usb device sharing between host and container.
 
-The Chatbot uses microphone input to detect speech. If its wake_up word ("Alfred") is detected, it will treat the spoken sentence as a request.
+The Chatbot uses microphone input to detect speech. If its wake_up word ("Alfred" by default) is detected, it will treat the spoken sentence as a request.
 When the Chatbot detect a request, it will send request to the LLM to get an answer and then use TTS to synthesize response and play the output through speakers.
 
 - TO-DO :
