@@ -24,7 +24,21 @@ Running the project requires at least 8GB of VRAM.
 
 * Start the Chatbot in the background :
 
-``` docker compose -f docker/docker-compose.yaml up -d ```
+* Linux :
+
+  - start all services, including microhpone
+
+    ``` docker compose -f docker/docker-compose.yaml up -d ```
+
+* Windows : 
+
+  - start only models services
+
+    ``` docker compose -f docker/docker-compose.yaml up -d asr tts llm```
+
+  - start listening from microphone
+
+    ``` python src/chatbot/clients.py ```
 
 Start talking using `Alfred` wake up word and wait for a response.
 
