@@ -9,10 +9,10 @@ The Chatbot uses microphone input to detect speech. If its wake_up word ("Alfred
 When the Chatbot detect a request, it will send request to the LLM to get an answer and then use TTS to synthesize response and play the output through speakers.
 
 - TO-DO :
-  * Add a way to use local models each service
-  * Add service to enable LLM model finetuning
-  * Reduce ASR model GPU usage
-  * Get or train a better French TTS model
+  * [WIP] Add a way to use local models each service
+  * [NotStarted] Add service to enable LLM model finetuning
+  * [Done !] Reduce ASR model GPU usage
+  * [NotStarted] Get or train a better French TTS model
 
 ## Requirements
 
@@ -28,7 +28,7 @@ Start talking using `Alfred` wake up word and wait for a response.
 
 * Environment variables :
 
-vLLM:
+vLLM: Server running LLM model
 ```
 MODEL : Model to load for vLLM server
 QUANTIZATION : Quantization mode
@@ -36,19 +36,19 @@ MAX_MODEL_LEN : maximum model length
 GPU_MEMORY_UTILIZATION : GPU utilization ratio
 ```
 
-TTS:
+TTS: Custom CoquiTTS server running TTS model
 ```
 MODEL : TTS model to load with CoquiTTS
 DEVICE : Device to use for TTS model : "cpu" or "cuda"
 ```
 
-ASR:
+ASR: Custom API serving wav2vec2 french onnx model predictions
 ```
 MODEL : Transformers ASR model to use
 DEVICE : Device to use for ASR model : "cpu" or "cuda"
 ```
 
-Chatbot:
+Chatbot: Main app entrypoint implementing chatbot logic : Microphone listening, wake up word, model api's requests
 ```
 NAME : Chatbot's name, used as wake up word.
 AUTONOMOUS_MODE : If set to `true`, the chatbot will talk to himself. No ASR.
@@ -58,5 +58,4 @@ AUTONOMOUS_MODE : If set to `true`, the chatbot will talk to himself. No ASR.
 
 * vLLM
 * CoquiTTS
-* Whisper
 * Whisper-Mic
